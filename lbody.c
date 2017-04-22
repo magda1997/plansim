@@ -38,3 +38,13 @@ void lbody_add(body_t *body, lbody_t *list)
 
     list->bodies[list->body_count++] = body;
 }
+
+void lbody_cleanup(lbody_t *list)
+{
+    int i;
+    for (i = 0; i < list->body_count; i++) {
+        body_cleanup(list->bodies[i]);
+    }
+
+    free(list->bodies);
+}
