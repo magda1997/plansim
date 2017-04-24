@@ -21,3 +21,9 @@ body_t* body_create(char *name)
 
     return body;
 }
+
+void body_cleanup(body_t *body)
+{
+    free(body->name);
+    free(body);
+}

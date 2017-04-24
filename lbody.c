@@ -2,8 +2,8 @@
 
 #include "body.h"
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void lbody_initialize(lbody_t *list)
 {
@@ -44,4 +44,36 @@ void lbody_read(lbody_t *list, FILE *in)
             lbody_add(body, list);
         }   
     }
+}
+
+static void lbody_extend(lbody_t *list)
+{
+    body_t **bodies = realloc(list->bodies, list->array_size * 2 * sizeof *bodies);
+
+    if (bodies == NULL) {
+        fprintf(stderr, "Rozszerzenie tablicy nie powiodlo sie.\n");
+        return;
+    }
+
+    list->bodies = bodies;
+    list->array_size *= 2;
+}
+
+void lbody_add(body_t *body, lbody_t *list)
+{
+    if (list->body_count == list->array_size) {
+        lbody_extend(list);
+    }
+
+    list->bodies[list->body_count++] = body;
+}
+
+void lbody_cleanup(lbody_t *list)
+{
+    int i;
+    for (i = 0; i < list->body_count; i++) {
+        body_cleanup(list->bodies[i]);
+    }
+
+    free(list->bodies);
 }
