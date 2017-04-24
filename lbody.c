@@ -3,6 +3,7 @@
 #include "body.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 void lbody_initialize(lbody_t *list)
@@ -19,30 +20,28 @@ void lbody_initialize(lbody_t *list)
 
 void lbody_read(lbody_t *list, FILE *in)
 {
-    char name[256];
-    double mass;
-    double x,y,z;
-    double vx,vy,vz;
+    char *buf = NULL;
+    long unsigned int n = 0;
 
-	while (fscanf(in, "%s %lf %lf %lf %lf %lf %lf %lf", name, &mass, &x, &y, &z, &vx, &vy, &vz) == 8) {
-	    if (mass < 0) {
-	        fprintf(stderr, "Masa nie moze byc ujemna, cialo pominiete.\n");
-	        continue;
+    while (n = getline(&buf, &n, in) != -1) {
+	n++;
+        char *tmp = buf;
+
+        char *name = strsep(&tmp, " ");
+
+        body_t *b = body_create(name);
+        if (b == NULL) {
+            fprintf(stderr, "Blad: Niewystarczajaca ilosc pamieci.\n");
+            exit(EXIT_FAILURE);
         }
-        
-        body_t *body = body_create(name);
-        
-        if (body != NULL) {
-            body->mass = mass;
-            body->x = x;
-            body->y = y;
-            body->z = z;
-            body->vx = vx;
-            body->vy = vy;
-            body->vz = vz;
-            
-            lbody_add(body, list);
-        }   
+
+        if (sscanf(tmp, "%lf %lf %lf %lf %lf %lf %lf", 
+            &b->mass, &b->x, &b->y, &b->z, &b->vx, &b->vy, &b->vz) != 7) {
+            fprintf(stderr, "Blad: zbyt malo parametrow, cialo pominiete.\n");
+        } else {
+            lbody_add(b, list);
+            body_print(b);
+        }
     }
 }
 
